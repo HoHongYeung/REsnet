@@ -1,0 +1,37 @@
+def save_checkpoint(net=None, optimizer=None, epoch=None, train_losses=None, train_acc=None, val_loss=None,
+                    val_acc=None, check_loss=None, savepath=None,m_name=None, GPUdevices=1):
+    if GPUdevices > 1:
+        net_weights = net.module.state_dict()
+    else:
+        net_weights = net.state_dict()
+    save_json = {
+        'net_state_dict': net_weights,
+        'optimizer_state_dict': optimizer.state_dict(),
+        'epoch': epoch,
+        'train_losses': train_losses,
+        'train_acc': train_acc,
+        'val_loss': val_loss,
+        'val_acc': val_acc
+    }
+    if check_loss > val_loss:
+        savepath = savepath + '/{}_best_params.pkl'.format(m_name)
+        check_loss = val_loss
+    else:
+        savepath = savepath + '/{}_epoch_{}.pkl'.format(m_name, epoch)
+    torch.save(save_json, savepath)
+    print("checkpoint of {}th epoch saved at {}".format(epoch, savepath))
+
+    return check_loss
+
+def load_checkpoint(model = None, optimizer=None, checkpoint_path=None,  losses_flag = None):
+    checkpoint = torch.load(checkpoint_path)
+
+    model.load_state_dict(checkpoint['net_state_dict'])
+    if optimizer:
+        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+    start_epoch = checkpoint['epoch']
+    if not losses_flag:
+        return model, optimizer, start_epoch
+    else:
+        losses = checkpoint['train_losses']
+        return model, optimizer, start_epoch, losses
