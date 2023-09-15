@@ -1,0 +1,46 @@
+
+import os
+import numpy as np
+import torch
+import torchvision
+import torchvision.transforms as transforms
+from torch.utils.data import TensorDataset, DataLoader,Dataset
+
+def training_transforms():
+    return transforms.Compose([
+            transforms.RandomCrop(32, padding=4),#数据增强
+            transforms.RandomHorizontalFlip(),#数据增强
+            transforms.RandomRotation(15),#数据增强
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.4914, 0.4822, 0.4465],std=[0.2471, 0.2435, 0.2616]),#归一化
+        ])
+def validation_transforms():
+    return transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.4914, 0.4822, 0.4465],std=[0.2471, 0.2435, 0.2616]),
+        ])
+
+def load_dataset(data_config):
+    if data_config.dataset == 'cifar10':
+        training_transform=training_transforms()
+        train_dataset = torchvision.datasets.CIFAR10(root=data_config.data_path,
+                                                     train=True,
+                                                     transform=training_transform,
+                                                     download=True)
+        val_dataset = torchvision.datasets.CIFAR10(root=data_config.data_path,
+                                                   train=False,
+                                                   transform=validation_transforms(),
+                                                   download=True)
+        return train_dataset,val_dataset
+    elif data_config.dataset == 'cifar100':
+        train_dataset = torchvision.datasets.CIFAR100(root=data_config.data_path,
+                                                     train=True,
+                                                     transform=training_transforms(),
+                                                     download=True)
+        val_dataset = torchvision.datasets.CIFAR100(root=data_config.data_path,
+                                                   train=False,
+                                                   transform=validation_transforms(),
+                                                   download=True)
+        return train_dataset, val_dataset
+    else:
+        raise Exception('unknown dataset: {}'.format(data_config.dataset))
