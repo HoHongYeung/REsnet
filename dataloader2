@@ -1,0 +1,6 @@
+train_dataset = torchvision.datasets.ImageFolder(traindir,
+                                                 transforms.Compose([
+                                                 transforms.RandomResizedCrop(64),
+                                                 transforms.RandomHorizontalFlip(),
+                                                 transforms.ToTensor(),
+                                                 normalize ]))
